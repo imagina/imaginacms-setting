@@ -1,5 +1,5 @@
 {
-  "name": "idavoll/setting-module",
+  "name": "imagina/setting-module",
   "type": "asgard-module",
   "description": "Setting module for AsgardCMS. Handles all the site settings.",
   "keywords": [
