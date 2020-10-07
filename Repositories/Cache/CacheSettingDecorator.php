@@ -21,7 +21,8 @@ class CacheSettingDecorator extends BaseCacheDecorator implements SettingReposit
      */
     public function createOrUpdate($settings)
     {
-        $this->cache->tags($this->entityName)->flush();
+        
+        $this->clearCache();
 
         return $this->repository->createOrUpdate($settings);
     }

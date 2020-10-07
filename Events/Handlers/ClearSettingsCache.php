@@ -2,7 +2,7 @@
 
 namespace Modules\Setting\Events\Handlers;
 
-use Illuminate\Contracts\Cache\Repository;
+use Modules\Setting\Repositories\Cache\CacheSettingDecorator;
 
 class ClearSettingsCache
 {
@@ -11,13 +11,13 @@ class ClearSettingsCache
      */
     private $cache;
 
-    public function __construct(Repository $cache)
+    public function __construct(CacheSettingDecorator $cache)
     {
         $this->cache = $cache;
     }
 
     public function handle()
     {
-        $this->cache->tags('setting.settings')->flush();
+      $this->cache->clearCache();
     }
 }
