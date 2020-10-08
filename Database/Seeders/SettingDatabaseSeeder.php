@@ -25,13 +25,18 @@ class SettingDatabaseSeeder extends Seeder
      */
     public function run()
     {
-        Model::unguard();
-
-        $data = [
-            'core::template' => 'Flatly',
-            'core::locales' => ['en'],
-        ];
-
-        $this->setting->createOrUpdate($data);
+      Model::unguard();
+  
+      $settingsToCreate = [
+        'core::template' => 'Flatly',
+        'core::locales' => ['en'],
+      ];
+  
+      foreach ($settingsToCreate as $key => $settingToCreate){
+        $setting = $settings->findByName($key);
+        if(!isset($setting->id)){
+          $settings->createOrUpdate([$key => $settingToCreate]);
+        }
+      }
     }
 }
