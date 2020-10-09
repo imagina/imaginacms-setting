@@ -35,7 +35,7 @@ class SettingDatabaseSeeder extends Seeder
       foreach ($settingsToCreate as $key => $settingToCreate){
         $setting = $settings->findByName($key);
         if(!isset($setting->id)){
-          $settings->createOrUpdate([$key => $settingToCreate]);
+          $this->setting->createOrUpdate([$key => $settingToCreate]);
         }
       }
     }
