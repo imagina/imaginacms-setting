@@ -33,7 +33,7 @@ class SettingDatabaseSeeder extends Seeder
       ];
   
       foreach ($settingsToCreate as $key => $settingToCreate){
-        $setting =  $this->settings->findByName($key);
+        $setting =  $this->setting->findByName($key);
         if(!isset($setting->id)){
           $this->setting->createOrUpdate([$key => $settingToCreate]);
         }
