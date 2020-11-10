@@ -15,7 +15,7 @@ abstract class BaseSettingTest extends TestCase
      */
     protected $settingRepository;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -36,11 +36,11 @@ abstract class BaseSettingTest extends TestCase
     {
         $app['path.base'] = __DIR__ . '/..';
         $app['config']->set('database.default', 'sqlite');
-        $app['config']->set('database.connections.sqlite', array(
+        $app['config']->set('database.connections.sqlite', [
             'driver' => 'sqlite',
             'database' => ':memory:',
             'prefix' => '',
-        ));
+        ]);
         $app['config']->set('asgard.core.settings', [
             'site-name' => [
                 'description' => 'core::settings.site-name',
@@ -57,6 +57,7 @@ abstract class BaseSettingTest extends TestCase
                 'translatable' => false,
             ],
         ]);
+        $app['config']->set('translatable.locales', ['en', 'fr']);
     }
 
     protected function getPackageAliases($app)
