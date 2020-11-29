@@ -2,6 +2,7 @@
 
 namespace Modules\Setting\Repositories\Cache;
 
+use Illuminate\Cache\NullStore;
 use Modules\Core\Repositories\Cache\BaseCacheDecorator;
 use Modules\Setting\Repositories\SettingRepository;
 
@@ -34,9 +35,13 @@ class CacheSettingDecorator extends BaseCacheDecorator implements SettingReposit
      */
     public function findByName($settingName)
     {
-        return $this->remember(function () use ($settingName) {
-            return $this->repository->findByName($settingName);
+        $settingValue = $this->remember(function () use ($settingName) {
+            return $this->repository->findByName($settingName) ?? $settingName.'___NULL';
         });
+
+        if($settingValue===$settingName.'___NULL') $settingValue = null;
+
+        return $settingValue;
     }
 
     /**
