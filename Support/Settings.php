@@ -2,6 +2,7 @@
 
 namespace Modules\Setting\Support;
 
+use Modules\Media\Image\Imagy;
 use Modules\Setting\Contracts\Setting;
 use Modules\Setting\Repositories\SettingRepository;
 
@@ -37,6 +38,10 @@ class Settings implements Setting
         }
 
         if ($setting->isMedia() && $media = $setting->files()->first()) {
+          if($media->isImage()){
+            $mediaFiles = $setting->mediaFiles();
+            return $mediaFiles->{'setting::mainimage'}->extraLargeThumb ?? $media->path;
+          }
             return $media->path;
         }
 
