@@ -81,9 +81,15 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
      * @param $settingName
      * @return mixed
      */
-    public function findByName($settingName)
+    public function findByName($settingName, $central = false)
     {
-        return $this->model->where('name', $settingName)->first();
+        $query = $this->model->where('name', $settingName);
+        
+        if($central){
+          $query->withoutTenancy()
+          ->whereNull("organization_id");
+        }
+        return $query->first();
     }
 
     /**
@@ -191,7 +197,14 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
      */
     public function findByModule($module)
     {
-        return $this->model->where('name', 'LIKE', $module . '::%')->get();
+        $query = $this->model->where('name', 'LIKE', $module . '::%');
+  
+        if(!isset(tenant()->id)){
+          $query->withoutTenancy()
+            ->whereNull("organization_id");
+        }
+      
+        return $query->get();
     }
 
     /**

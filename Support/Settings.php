@@ -28,11 +28,12 @@ class Settings implements Setting
      * @param  string   $default
      * @return mixed
      */
-    public function get($name, $locale = null, $default = null)
+    public function get($name, $locale = null, $default = null, $central = false)
     {
         $defaultFromConfig = $this->getDefaultFromConfigFor($name);
 
-        $setting = $this->setting->findByName($name);
+        $setting = $this->setting->findByName($name, $central);
+      
         if ($setting === null) {
             return is_null($default) ? $defaultFromConfig : $default;
         }

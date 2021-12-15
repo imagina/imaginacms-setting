@@ -1,9 +1,9 @@
 <?php
 
 if (!function_exists('setting')) {
-  function setting($name, $locale = null, $default = null)
+  function setting($name, $locale = null, $default = null, $central = false)
   {
-    return app('setting.settings')->get($name, $locale, $default);
+    return app('setting.settings')->get($name, $locale, $default, $central);
   }
 }
 
