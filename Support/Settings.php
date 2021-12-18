@@ -41,7 +41,8 @@ class Settings implements Setting
         if ($setting->isMedia() && $media = $setting->files()->first()) {
           if($media->isImage()){
             $mediaFiles = $setting->mediaFiles();
-            return $mediaFiles->{'setting::mainimage'}->extraLargeThumb ?? $media->path;
+            
+            return $mediaFiles->{$setting->name}->extraLargeThumb ?? $mediaFiles->{'setting::mainimage'}->extraLargeThumb ?? $media->path;
           }
             return $media->path;
         }
