@@ -10,6 +10,7 @@ use Modules\Setting\Events\SettingIsUpdating;
 use Modules\Setting\Events\SettingWasCreated;
 use Modules\Setting\Events\SettingWasUpdated;
 use Modules\Setting\Repositories\SettingRepository;
+use Illuminate\Support\Facades\Cache;
 
 class EloquentSettingRepository extends EloquentBaseRepository implements SettingRepository
 {
@@ -83,13 +84,18 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
      */
     public function findByName($settingName, $central = false)
     {
-        $query = $this->model->where('name', $settingName);
-        
-        if($central){
-          $query->withoutTenancy()
-          ->whereNull("organization_id");
-        }
+      $model = $this->model;
+  
+      return Cache::store('array')->remember('setting_'.$settingName.$central, 60, function () use ($model,$settingName,$central){
+        $query = $model->where('name', $settingName);
+         if($central){
+         $query->withoutTenancy()
+         ->whereNull("organization_id");
+       }
+  
         return $query->first();
+      });
+      
     }
 
     /**
