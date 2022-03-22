@@ -87,7 +87,7 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   {
     $model = $this->model;
 
-    return Cache::store('array')->remember('setting_' . $settingName . $central, 5, function () use ($model, $settingName, $central) {
+    return Cache::store('array')->remember('setting_' . $settingName . $central, 60, function () use ($model, $settingName, $central) {
       $query = $model->where('name', $settingName);
 
       $entitiesWithCentralData = $this->get("isite::tenantWithCentralData", true);
