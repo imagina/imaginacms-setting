@@ -88,6 +88,8 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
     $model = $this->model;
 
     return Cache::store('array')->remember('setting_' . $settingName . $central, 60, function () use ($model, $settingName, $central) {
+    	
+			
       $query = $model->where('name', $settingName);
 
       $entitiesWithCentralData = $this->get("isite::tenantWithCentralData", true);
@@ -103,7 +105,7 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
             ->orWhereNull($model->qualifyColumn(BelongsToTenant::$tenantIdColumn));
         });
       }
-      return $query->first();
+      return $query->first() ?? "";
     });
 
   }
@@ -211,17 +213,29 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
    * @param string $module Module name
    * @return mixed
    */
-  public function findByModule($module)
+  public function findByModule($module, $central = false)
   {
+		$model = $this->model;
+    return Cache::store('array')->remember('module_settings_' . $module . $central, 60, function () use ($model,$module, $central) {
+    $query = $model->where('name', 'LIKE', $module . '::%');
 
-    $query = $this->model->where('name', 'LIKE', $module . '::%');
-
-    if (!isset(tenant()->id)) {
+      $entitiesWithCentralData = $this->get("isite::tenantWithCentralData", true);
+      $entitiesWithCentralData = json_decode($entitiesWithCentralData->plainValue ?? '[]');
+      $tenantWithCentralData = in_array("setting", $entitiesWithCentralData);
+      if ($central) {
       $query->withoutTenancy()
         ->whereNull("organization_id");
+      } elseif ($tenantWithCentralData && isset(tenant()->id)) {
+        $query->withoutTenancy();
+        $query->where(function ($query) use ($model) {
+          $query->where($model->qualifyColumn(BelongsToTenant::$tenantIdColumn), tenant()->getTenantKey())
+            ->orWhereNull($model->qualifyColumn(BelongsToTenant::$tenantIdColumn));
+        });
     }
 
     return $query->get();
+    });
+    
   }
 
   /**
