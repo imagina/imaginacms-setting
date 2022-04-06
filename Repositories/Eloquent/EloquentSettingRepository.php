@@ -246,11 +246,15 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   public function get($settingName, $central = false)
   {
     $query = $this->model->where('name', 'LIKE', "{$settingName}");
-
-    if ($central) {
-      $query->withoutTenancy()
-        ->whereNull("organization_id");
+  
+    //validate if the settings table already has the organization_id column to avoid error in the composer update
+    if (\Schema::hasColumn('setting__settings', 'organization_id')) {
+      if ($central) {
+        $query->withoutTenancy()
+          ->whereNull("organization_id");
+      }
     }
+    
 
     return $query->first();
   }
