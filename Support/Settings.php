@@ -34,7 +34,7 @@ class Settings implements Setting
 
         $setting = $this->setting->findByName($name, $central);
       
-        if ($setting === null) {
+        if (empty($setting)) {
             return is_null($default) ? $defaultFromConfig : $default;
         }
 
