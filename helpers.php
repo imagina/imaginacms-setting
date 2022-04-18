@@ -20,6 +20,7 @@ if (!function_exists('getSettingsFormat')) {
       //Create setting
       if (!isset($response[$settingName])) {
         $response[$settingName] = [
+          'onlySuperAdmin' => $field->onlySuperAdmin ?? false,
           'description' => isset($field->children) ? ($field->group ?? $field->label ?? '') :
             (isset($field->props) ? ($field->props->label ?? '') : ''),
           'default' => isset($field->children) || isset($field->fakeFieldName) ? [] : ($field->value ?? null),
