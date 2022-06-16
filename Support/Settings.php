@@ -30,9 +30,15 @@ class Settings implements Setting
      */
     public function get($name, $locale = null, $default = null, $central = false)
     {
+     
         $defaultFromConfig = $this->getDefaultFromConfigFor($name);
-
-        $setting = $this->setting->findByName($name, $central);
+  
+      //tracking if the env DB_DATABASE not exist to avoid the query in the DB
+      if(env('DB_DATABASE', 'forge') == 'forge')
+        return is_null($default) ? $defaultFromConfig : $default;
+  
+      
+      $setting = $this->setting->findByName($name, $central);
       
         if (empty($setting)) {
             return is_null($default) ? $defaultFromConfig : $default;
