@@ -12,7 +12,7 @@ class Setting extends Model
     use Translatable, MediaRelation, BelongsToTenant;
 
     public $translatedAttributes = ['value', 'description'];
-    protected $fillable = ['name', 'value', 'description', 'isTranslatable', 'plainValue'];
+    protected $fillable = ['name', 'value', 'description', 'isTranslatable', 'plainValue','organization_id'];
     protected $table = 'setting__settings';
 
     public function isMedia(): bool
