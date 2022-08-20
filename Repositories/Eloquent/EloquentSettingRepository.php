@@ -83,11 +83,11 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
    * @param $settingName
    * @return mixed
    */
-  public function findByName($settingName, $central = false)
+  public function findByName($settingName, $central = false,$organizationId=null)
   {
     $model = $this->model;
 
-    return Cache::store('array')->remember('setting_' . $settingName . $central, 60, function () use ($model, $settingName, $central) {
+    return Cache::store('array')->remember('setting_' . $settingName . $central, 60, function () use ($model, $settingName, $central,$organizationId) {
     	
 			
       $query = $model->where('name', $settingName);
@@ -101,9 +101,10 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
       } elseif ($tenantWithCentralData && isset(tenant()->id)) {
         $query->withoutTenancy();
         $query->where(function ($query) use ($model) {
-          $query->where($model->qualifyColumn(BelongsToTenant::$tenantIdColumn), tenant()->getTenantKey())
-            ->orWhereNull($model->qualifyColumn(BelongsToTenant::$tenantIdColumn));
+          $query->where($model->qualifyColumn(BelongsToTenant::$tenantIdColumn), tenant()->getTenantKey());
         });
+      }elseif(!is_null($organizationId)){
+        $query->where("organization_id",$organizationId);
       }
       return $query->first() ?? "";
     });
