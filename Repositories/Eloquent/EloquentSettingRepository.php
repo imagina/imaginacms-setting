@@ -95,6 +95,7 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
       $entitiesWithCentralData = $this->get("isite::tenantWithCentralData", true);
       $entitiesWithCentralData = json_decode($entitiesWithCentralData->plainValue ?? '[]');
       $tenantWithCentralData = in_array("setting", $entitiesWithCentralData);
+      
       if ($central) {
         $query->withoutTenancy()
           ->whereNull("organization_id");
@@ -106,6 +107,8 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
       }elseif(!is_null($organizationId)){
         $query->where("organization_id",$organizationId);
       }
+
+
       return $query->first() ?? "";
     });
 
