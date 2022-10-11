@@ -27,6 +27,7 @@ class SettingDatabaseSeeder extends Seeder
     {
       Model::unguard();
   
+      $this->call(SettingModuleTableSeeder::class);
       $settingsToCreate = [
         'core::template' => 'ImaginaTheme',
         'core::locales' => ['es'],
