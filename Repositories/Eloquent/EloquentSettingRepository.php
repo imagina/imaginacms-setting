@@ -87,7 +87,7 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   {
     $model = $this->model;
 
-    return Cache::store(config("cache.default"))->remember('setting_' . $settingName . $central, 60, function () use ($model, $settingName, $central,$organizationId) {
+    return Cache::store(config("cache.default"))->remember((isset(tenant()->id) ? "organization".tenant()->id."_" : "").'setting_' . $settingName . $central, 60, function () use ($model, $settingName, $central,$organizationId) {
     	
 			
       $query = $model->where('name', $settingName);
@@ -220,7 +220,7 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   public function findByModule($module, $central = false)
   {
 		$model = $this->model;
-    return Cache::store(config("cache.default"))->remember('module_settings_' . $module . $central, 60, function () use ($model,$module, $central) {
+    return Cache::store(config("cache.default"))->remember((isset(tenant()->id) ? "organization".tenant()->id."_" : "").'module_settings_' . $module . $central, 60, function () use ($model,$module, $central) {
     $query = $model->where('name', 'LIKE', $module . '::%');
 
       $entitiesWithCentralData = $this->get("isite::tenantWithCentralData", true);
