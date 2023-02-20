@@ -231,16 +231,20 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   public function findByModule($module, $central = false)
   {
     $model = $this->model;
-    return Cache::store(config("cache.default"))->tags('setting.settings')->remember('module_settings_' . $module . $central, 60, function () use ($model, $module, $central) {
+   
+    return Cache::store(config("cache.default"))->tags('setting.settings'.(tenant()->id ?? ""))
+      ->remember('module_settings_' . $module . $central.(tenant()->id ?? ""), 60,
+        function () use ($model, $module, $central) {
       $query = $model->where('name', 'LIKE', $module . '::%');
   
       if (config("tenancy.mode") == "singleDatabase") {
-        $entitiesWithCentralData = Cache::store(config("cache.default"))->remember('module_settings_tenantWithCentralData', 60, function () {
+        $entitiesWithCentralData = Cache::store(config("cache.default"))
+          ->remember('module_settings_tenantWithCentralData'.(tenant()->id ?? ""), 60, function () {
           return $this->get("isite::tenantWithCentralData", true);
         });
         $entitiesWithCentralData = json_decode($entitiesWithCentralData->plainValue ?? '[]');
         $tenantWithCentralData = in_array("setting", $entitiesWithCentralData);
-        if ($central) {
+        if ($central || !isset(tenant()->id)) {
           $query->withoutTenancy()
             ->whereNull("organization_id");
         } elseif ($tenantWithCentralData && isset(tenant()->id)) {
