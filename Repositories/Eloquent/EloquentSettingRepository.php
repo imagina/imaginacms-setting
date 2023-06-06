@@ -93,15 +93,15 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   {
     $model = $this->model;
     
-    return Cache::store(config("cache.default"))->tags("setting.settings")->remember('setting_' . $settingName . $central, 60, function () use ($model, $settingName, $central, $organizationId) {
+    return Cache::store(config("cache.default"))->tags("setting.settings")->remember('setting_' . $settingName . $central, 120, function () use ($model, $settingName, $central, $organizationId) {
       
       
-      $query = $model->where('name', $settingName);
+      $query = $model->where('name', $settingName)->with("files","files.translations","translations");
   
       if (config("tenancy.mode") == "singleDatabase") {
         
         
-        $entitiesWithCentralData = Cache::store(config("cache.default"))->tags("setting.settings")->remember('module_settings_tenantWithCentralData', 60, function () {
+        $entitiesWithCentralData = Cache::store(config("cache.default"))->tags("setting.settings")->remember('module_settings_tenantWithCentralData', 120, function () {
           return $this->get("isite::tenantWithCentralData", true);
         });
         $entitiesWithCentralData = json_decode($entitiesWithCentralData->plainValue ?? '[]');
@@ -233,13 +233,13 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
     $model = $this->model;
    
     return Cache::store(config("cache.default"))->tags('setting.settings'.(tenant()->id ?? ""))
-      ->remember('module_settings_' . $module . $central.(tenant()->id ?? ""), 60,
+      ->remember('module_settings_' . $module . $central.(tenant()->id ?? ""), 120,
         function () use ($model, $module, $central) {
       $query = $model->where('name', 'LIKE', $module . '::%');
   
       if (config("tenancy.mode") == "singleDatabase") {
         $entitiesWithCentralData = Cache::store(config("cache.default"))
-          ->remember('module_settings_tenantWithCentralData'.(tenant()->id ?? ""), 60, function () {
+          ->remember('module_settings_tenantWithCentralData'.(tenant()->id ?? ""), 120, function () {
           return $this->get("isite::tenantWithCentralData", true);
         });
         $entitiesWithCentralData = json_decode($entitiesWithCentralData->plainValue ?? '[]');
