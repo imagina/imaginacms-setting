@@ -81,7 +81,17 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   
   private function removeCache()
   {
-    Cache::tags("setting.settings")->flush();
+    /*
+    $setKey = "setting_icommerce::productContentTitleFontSize";
+    $tagGet = Cache::tags("setting.settings")->get($setKey);
+    \Log::info("BEFORE REPO Cache Setting: ".json_encode($tagGet));
+    */
+
+    //Esto limpiaba el cache pero aun asi seguia apareciendo un valor anterior
+    //Cache::tags("setting.settings")->flush();
+    
+    Cache::flush();
+    
   }
   
   /**
