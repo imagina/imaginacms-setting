@@ -95,7 +95,7 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   {
     $model = $this->model;
     
-    return Cache::store(config("cache.default"))->tags("setting.settings")->remember('setting_' . $settingName . $central, 120, function () use ($model, $settingName, $central, $organizationId) {
+    return Cache::store(config("cache.default"))->tags("setting.settings".(tenant()->id ?? ""))->remember('setting_' . $settingName . $central, 120, function () use ($model, $settingName, $central, $organizationId) {
       
       
       $query = $model->where('name', $settingName)->with("files","files.translations","translations");
