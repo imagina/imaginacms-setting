@@ -12,6 +12,7 @@ use Modules\Setting\Events\SettingWasUpdated;
 use Modules\Setting\Repositories\SettingRepository;
 use Illuminate\Support\Facades\Cache;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 class EloquentSettingRepository extends EloquentBaseRepository implements SettingRepository
 {
@@ -81,9 +82,9 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   
   private function removeCache()
   {
-    
     Cache::tags("setting.settings".(tenant()->id ?? ""))->flush();
-    
+    ResponseCache::clear(); //TODO temporal solution to clear frontend cache when some setting it changed, the problem is that is deleting the cache of all tenants so it needs to be improved
+  
   }
   
   /**
