@@ -3,7 +3,7 @@
 if (!function_exists('setting')) {
   function setting($name, $locale = null, $default = null, $central = false)
   {
-    if(!\Schema::hasTable('setting__settings')) return $default;
+    if(!app('asgard.isInstalled')) return $default;
     return app('setting.settings')->get($name, $locale, $default, $central);
   }
 }
