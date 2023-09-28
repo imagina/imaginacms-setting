@@ -3,13 +3,12 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class MakeSettingsValueTextField extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('setting__settings', function (Blueprint $table) {
             $table->text('plainValue')->string('plainValue')->change();
@@ -21,9 +20,8 @@ class MakeSettingsValueTextField extends Migration
 
     /**
      * Reverse the migrations.
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('setting__settings', function (Blueprint $table) {
             $table->string('plainValue')->text('plainValue')->change();
@@ -32,4 +30,4 @@ class MakeSettingsValueTextField extends Migration
             $table->string('value')->text('value')->change();
         });
     }
-}
+};
