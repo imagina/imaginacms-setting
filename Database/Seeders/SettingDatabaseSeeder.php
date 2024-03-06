@@ -31,11 +31,13 @@ class SettingDatabaseSeeder extends Seeder
             'core::locales' => ['es'],
         ];
 
-        foreach ($settingsToCreate as $key => $settingToCreate) {
+        if (config('asgard.core.core.is_installed')) {
+          foreach ($settingsToCreate as $key => $settingToCreate) {
             $setting = $this->setting->findByName($key);
             if (! isset($setting->id)) {
-                $this->setting->createOrUpdate([$key => $settingToCreate]);
+              $this->setting->createOrUpdate([$key => $settingToCreate]);
             }
+          }
         }
     }
 }

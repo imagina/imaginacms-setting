@@ -90,11 +90,6 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   {
     $model = $this->model;
 
-    //test
-    if (!config('asgard.core.core.is_installed')) {
-      return [];
-    }
-
     return Cache::store(config('cache.default'))->tags('setting.settings')->remember('setting_' . $settingName . $central, 120, function () use ($model, $settingName, $central, $organizationId) {
       $query = $model->where('name', $settingName)->with('files', 'files.translations', 'translations');
 
