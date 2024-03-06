@@ -93,9 +93,8 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
     $query = $model->where('name', $settingName)->with('files', 'files.translations', 'translations');
 
     if (config('tenancy.mode') == 'singleDatabase') {
-      $entitiesWithCentralData = Cache::store(config('cache.default'))->tags('setting.settings')->remember('module_settings_tenantWithCentralData', 120, function () {
-        return $this->get('isite::tenantWithCentralData', true);
-      });
+      $entitiesWithCentralData = $this->get('isite::tenantWithCentralData', true);
+
       $entitiesWithCentralData = json_decode($entitiesWithCentralData->plainValue ?? '[]');
       $tenantWithCentralData = in_array('setting', $entitiesWithCentralData);
 
