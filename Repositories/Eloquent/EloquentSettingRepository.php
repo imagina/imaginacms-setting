@@ -90,31 +90,30 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   {
     $model = $this->model;
 
-    return Cache::store(config('cache.default'))->tags('setting.settings')->remember('setting_' . $settingName . $central, 120, function () use ($model, $settingName, $central, $organizationId) {
-      $query = $model->where('name', $settingName)->with('files', 'files.translations', 'translations');
+    $query = $model->where('name', $settingName)->with('files', 'files.translations', 'translations');
 
-      if (config('tenancy.mode') == 'singleDatabase') {
-        $entitiesWithCentralData = Cache::store(config('cache.default'))->tags('setting.settings')->remember('module_settings_tenantWithCentralData', 120, function () {
-          return $this->get('isite::tenantWithCentralData', true);
+    if (config('tenancy.mode') == 'singleDatabase') {
+      $entitiesWithCentralData = Cache::store(config('cache.default'))->tags('setting.settings')->remember('module_settings_tenantWithCentralData', 120, function () {
+        return $this->get('isite::tenantWithCentralData', true);
+      });
+      $entitiesWithCentralData = json_decode($entitiesWithCentralData->plainValue ?? '[]');
+      $tenantWithCentralData = in_array('setting', $entitiesWithCentralData);
+
+      if ($central) {
+        $query->withoutTenancy()
+          ->whereNull('organization_id');
+      } elseif ($tenantWithCentralData && isset(tenant()->id)) {
+        $query->withoutTenancy();
+        $query->where(function ($query) use ($model) {
+          $query->where($model->qualifyColumn(BelongsToTenant::$tenantIdColumn), tenant()->getTenantKey());
         });
-        $entitiesWithCentralData = json_decode($entitiesWithCentralData->plainValue ?? '[]');
-        $tenantWithCentralData = in_array('setting', $entitiesWithCentralData);
-
-        if ($central) {
-          $query->withoutTenancy()
-            ->whereNull('organization_id');
-        } elseif ($tenantWithCentralData && isset(tenant()->id)) {
-          $query->withoutTenancy();
-          $query->where(function ($query) use ($model) {
-            $query->where($model->qualifyColumn(BelongsToTenant::$tenantIdColumn), tenant()->getTenantKey());
-          });
-        } elseif (!is_null($organizationId)) {
-          $query->where('organization_id', $organizationId);
-        }
+      } elseif (!is_null($organizationId)) {
+        $query->where('organization_id', $organizationId);
       }
+    }
 
-      return $query->first() ?? '';
-    });
+    return $query->first() ?? '';
+
   }
 
   /**
