@@ -90,6 +90,7 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   {
     $model = $this->model;
 
+    //test
     if (!config('asgard.core.core.is_installed')) {
       return [];
     }
