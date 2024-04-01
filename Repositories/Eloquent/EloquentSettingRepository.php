@@ -78,7 +78,9 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
 
   private function removeCache()
   {
-    Cache::tags('setting.settings')->flush();
+    Cache::tags("setting.settings".(tenant()->id ?? ""))->flush();
+    ResponseCache::clear(); //TODO temporal solution to clear frontend cache when some setting it changed, the problem is that is deleting the cache of all tenants so it needs to be improved
+
   }
 
   /**
@@ -90,28 +92,35 @@ class EloquentSettingRepository extends EloquentBaseRepository implements Settin
   {
     $model = $this->model;
 
-    $query = $model->where('name', $settingName)->with('files', 'files.translations', 'translations');
+    return Cache::store(config("cache.default"))->tags("setting.settings".(tenant()->id ?? ""))->remember('setting_' . $settingName . $central, 120, function () use ($model, $settingName, $central, $organizationId) {
 
-    if (config('tenancy.mode') == 'singleDatabase') {
-      $entitiesWithCentralData = $this->get('isite::tenantWithCentralData', true);
 
-      $entitiesWithCentralData = json_decode($entitiesWithCentralData->plainValue ?? '[]');
-      $tenantWithCentralData = in_array('setting', $entitiesWithCentralData);
+      $query = $model->where('name', $settingName)->with("files","files.translations","translations");
 
-      if ($central) {
-        $query->withoutTenancy()
-          ->whereNull('organization_id');
-      } elseif ($tenantWithCentralData && isset(tenant()->id)) {
-        $query->withoutTenancy();
-        $query->where(function ($query) use ($model) {
-          $query->where($model->qualifyColumn(BelongsToTenant::$tenantIdColumn), tenant()->getTenantKey());
+      if (config("tenancy.mode") == "singleDatabase") {
+
+
+        $entitiesWithCentralData = Cache::store(config("cache.default"))->tags("setting.settings")->remember('module_settings_tenantWithCentralData', 120, function () {
+          return $this->get("isite::tenantWithCentralData", true);
         });
-      } elseif (!is_null($organizationId)) {
-        $query->where('organization_id', $organizationId);
-      }
-    }
+        $entitiesWithCentralData = json_decode($entitiesWithCentralData->plainValue ?? '[]');
+        $tenantWithCentralData = in_array("setting", $entitiesWithCentralData);
 
-    return $query->first() ?? '';
+        if ($central) {
+          $query->withoutTenancy()
+            ->whereNull("organization_id");
+        } elseif ($tenantWithCentralData && isset(tenant()->id)) {
+          $query->withoutTenancy();
+          $query->where(function ($query) use ($model) {
+            $query->where($model->qualifyColumn(BelongsToTenant::$tenantIdColumn), tenant()->getTenantKey());
+          });
+        } elseif (!is_null($organizationId)) {
+          $query->where("organization_id", $organizationId);
+        }
+      }
+
+      return $query->first() ?? "";
+    });
 
   }
 
