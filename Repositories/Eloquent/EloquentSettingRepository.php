@@ -11,6 +11,7 @@ use Modules\Setting\Events\SettingWasCreated;
 use Modules\Setting\Events\SettingWasUpdated;
 use Modules\Setting\Repositories\SettingRepository;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 class EloquentSettingRepository extends EloquentBaseRepository implements SettingRepository
 {
