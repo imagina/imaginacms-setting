@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('setting__setting_translations', function (Blueprint $table) {
-            $table->string('value')->nullable()->change();
+        Schema::table('setting__settings', function (Blueprint $table) {
+            $table->auditStamps();
+            $table->dropUnique('setting__settings_name_unique');
+            $table->unique(['name', 'organization_id'])->change();
         });
     }
 
@@ -21,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('setting__setting_translations', function (Blueprint $table) {
-            $table->string('value')->nullable(false)->change();
-        });
+        //
     }
 };

@@ -12,9 +12,6 @@ class Settings implements Setting
      */
     private $setting;
 
-    /**
-     * @param SettingRepository $setting
-     */
     public function __construct(SettingRepository $setting)
     {
         $this->setting = $setting;
@@ -22,27 +19,39 @@ class Settings implements Setting
 
     /**
      * Getting the setting
-     * @param  string $name
-     * @param  string   $locale
-     * @param  string   $default
+     *
      * @return mixed
      */
-    public function get($name, $locale = null, $default = null)
+    public function get($name, $locale = null, $default = null, $central = false)
     {
         $defaultFromConfig = $this->getDefaultFromConfigFor($name);
 
-        $setting = $this->setting->findByName($name);
-        if ($setting === null) {
+        //tracking if the env DB_DATABASE not exist to avoid the query in the DB
+        if (env('DB_DATABASE', 'forge') == 'forge') {
             return is_null($default) ? $defaultFromConfig : $default;
         }
 
-        if($setting->isMedia() && $media = $setting->files()->first()) {
+        $setting = $this->setting->findByName($name, $central);
+
+        if (empty($setting)) {
+            return is_null($default) ? $defaultFromConfig : $default;
+        }
+
+        if ($setting->isMedia() && $media = $setting->files->first()) {
+            if ($media->isImage()) {
+                $mediaFiles = $setting->mediaFiles();
+
+                return $mediaFiles->{$setting->name}->extraLargeThumb ?? $mediaFiles->{'setting::mainimage'}->extraLargeThumb ?? $media->path;
+            }
+
             return $media->path;
         }
 
         if ($setting->isTranslatable) {
-            if ($setting->hasTranslation($locale)) {
-                return trim($setting->translate($locale)->value) === '' ? $defaultFromConfig : $setting->translate($locale)->value;
+            if ($setting->ownHasTranslation($locale)) {
+                $value = trim($setting->getValueByLocale($locale));
+
+                return $value === '' ? $defaultFromConfig : $value;
             }
         } else {
             return trim($setting->plainValue) === '' ? $defaultFromConfig : $setting->plainValue;
@@ -53,9 +62,6 @@ class Settings implements Setting
 
     /**
      * Determine if the given configuration value exists.
-     *
-     * @param  string $name
-     * @return bool
      */
     public function has($name)
     {
@@ -67,9 +73,7 @@ class Settings implements Setting
     /**
      * Set a given configuration value.
      *
-     * @param  string $key
      * @param  mixed  $value
-     * @return \Modules\Setting\Entities\Setting
      */
     public function set($key, $value)
     {
@@ -82,12 +86,10 @@ class Settings implements Setting
     /**
      * Get the default value from the settings configuration file,
      * for the given setting name.
-     * @param string $name
-     * @return string
      */
     private function getDefaultFromConfigFor($name)
     {
-        list($module, $settingName) = explode('::', $name);
+        [$module, $settingName] = explode('::', $name);
 
         return config("asgard.$module.settings.$settingName.default", '');
     }

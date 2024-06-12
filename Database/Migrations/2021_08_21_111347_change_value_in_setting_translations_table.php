@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('setting__setting_translations', function (Blueprint $table) {
-            $table->string('value')->nullable()->change();
+            $table->text('value')->change();
         });
     }
 
@@ -21,8 +21,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('setting__setting_translations', function (Blueprint $table) {
-            $table->string('value')->nullable(false)->change();
-        });
+        //
     }
 };
