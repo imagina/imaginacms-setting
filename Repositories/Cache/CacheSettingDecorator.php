@@ -35,8 +35,8 @@ class CacheSettingDecorator extends BaseCacheDecorator implements SettingReposit
      */
     public function findByName($settingName, $central = false, $organizationId = null)
     {
-        $settingValue = $this->remember(function () use ($settingName) {
-            return $this->repository->findByName($settingName) ?? $settingName.'___NULL';
+        $settingValue = $this->remember(function () use ($settingName,$central,$organizationId) {
+            return $this->repository->findByName($settingName,$central,$organizationId) ?? $settingName.'___NULL';
         });
 
         if($settingValue===$settingName.'___NULL') $settingValue = null;
