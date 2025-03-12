@@ -44,6 +44,8 @@ class Settings implements Setting
                 return $mediaFiles->{$setting->name}->extraLargeThumb ?? $mediaFiles->{'setting::mainimage'}->extraLargeThumb ?? $media->path;
             }
 
+            if($media->extension == 'svg') return "$media->path";
+
             return $media->path;
         }
 
