@@ -2,9 +2,9 @@
 
 namespace Modules\Setting\Repositories;
 
-use Modules\Core\Repositories\BaseRepository;
+use Modules\Core\Icrud\Repositories\BaseCrudRepository;
 
-interface SettingRepository extends BaseRepository
+interface SettingRepository extends BaseCrudRepository
 {
     /**
      * Create or update the settings

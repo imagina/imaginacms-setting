@@ -3,10 +3,10 @@
 namespace Modules\Setting\Repositories\Cache;
 
 use Illuminate\Cache\NullStore;
-use Modules\Core\Repositories\Cache\BaseCacheDecorator;
+use Modules\Core\Icrud\Repositories\Cache\BaseCacheCrudDecorator;
 use Modules\Setting\Repositories\SettingRepository;
 
-class CacheSettingDecorator extends BaseCacheDecorator implements SettingRepository
+class CacheSettingDecorator extends BaseCacheCrudDecorator implements SettingRepository
 {
     public function __construct(SettingRepository $setting)
     {
@@ -22,10 +22,8 @@ class CacheSettingDecorator extends BaseCacheDecorator implements SettingReposit
      */
     public function createOrUpdate($settings)
     {
-        
-        $this->clearCache();
-
-        return $this->repository->createOrUpdate($settings);
+      $this->cache->tags($this->getTags())->flush();
+      return $this->repository->createOrUpdate($settings);
     }
 
     /**
@@ -35,13 +33,14 @@ class CacheSettingDecorator extends BaseCacheDecorator implements SettingReposit
      */
     public function findByName($settingName, $central = false, $organizationId = null)
     {
-        $settingValue = $this->remember(function () use ($settingName,$central,$organizationId) {
-            return $this->repository->findByName($settingName,$central,$organizationId) ?? $settingName.'___NULL';
-        });
-
-        if($settingValue===$settingName.'___NULL') $settingValue = null;
-
+      $query = $this->repository->findByName($settingName,$central,$organizationId, true);
+      return $this->remember(function () use ($settingName, $central, $organizationId) {
+        $settingValue = $this->repository->findByName($settingName,$central,$organizationId) ?? $settingName.'___NULL';
+        if ($settingValue === $settingName.'___NULL') {
+          $settingValue = null;
+        }
         return $settingValue;
+      }, $this->createKey($query, ["settingName" => $settingName]));
     }
 
     /**

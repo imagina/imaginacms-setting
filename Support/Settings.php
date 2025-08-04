@@ -12,6 +12,7 @@ class Settings implements Setting
      * @var SettingRepository
      */
     private $setting;
+    protected $settingsCache = null;
 
     /**
      * @param SettingRepository $setting
@@ -30,16 +31,22 @@ class Settings implements Setting
      */
     public function get($name, $locale = null, $default = null, $central = false)
     {
-     
-        $defaultFromConfig = $this->getDefaultFromConfigFor($name);
-  
+      $defaultFromConfig = $this->getDefaultFromConfigFor($name);
+
       //tracking if the env DB_DATABASE not exist to avoid the query in the DB
-      if(env('DB_DATABASE', 'forge') == 'forge')
+      if(env('DB_DATABASE', 'forge') == 'forge') {
         return is_null($default) ? $defaultFromConfig : $default;
-  
-      
-      $setting = $this->setting->findByName($name, $central);
-      
+      }
+
+      // NEW: Lazy-load full settings once by session
+      if (is_null($this->settingsCache)) {
+        $this->settingsCache = $this->setting->getItemsBy(json_decode(json_encode([
+            'include' => ["files", "files.translations", "translations"]]
+        )))->keyBy('name');
+      }
+
+      $setting = $this->settingsCache->get($name);
+
         if (empty($setting)) {
             return is_null($default) ? $defaultFromConfig : $default;
         }
@@ -47,7 +54,7 @@ class Settings implements Setting
         if ($setting->isMedia() && $media = $setting->files->first()) {
           if($media->isImage()){
             $mediaFiles = $setting->mediaFiles();
-            
+
             return $mediaFiles->{$setting->name}->extraLargeThumb ?? $mediaFiles->{'setting::mainimage'}->extraLargeThumb ?? $media->path;
           }
             return $media->path;
