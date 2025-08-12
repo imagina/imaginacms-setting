@@ -12,7 +12,7 @@ class Settings implements Setting
      * @var SettingRepository
      */
     private $setting;
-    protected $settingsCache = null;
+    protected $settingsCache = [];
 
     /**
      * @param SettingRepository $setting
@@ -38,14 +38,18 @@ class Settings implements Setting
         return is_null($default) ? $defaultFromConfig : $default;
       }
 
-      // NEW: Lazy-load full settings once by session
-      if (is_null($this->settingsCache)) {
-        $this->settingsCache = $this->setting->getItemsBy(json_decode(json_encode([
-            'include' => ["files", "files.translations", "translations"]]
-        )))->keyBy('name');
+      $tenantId = tenant()->id ?? 'central';
+
+      // Create the cache array if not yet set
+      if (!isset($this->settingsCache[$tenantId])) {
+        $this->settingsCache[$tenantId] = $this->setting
+          ->getItemsBy([
+            'include' => ["files", "files.translations", "translations"]
+          ])
+          ->keyBy('name');
       }
 
-      $setting = $this->settingsCache->get($name);
+      $setting = $this->settingsCache[$tenantId]->get($name);
 
         if (empty($setting)) {
             return is_null($default) ? $defaultFromConfig : $default;
