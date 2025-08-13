@@ -38,7 +38,7 @@ class Settings implements Setting
         return is_null($default) ? $defaultFromConfig : $default;
       }
 
-      $tenantId = tenant()->id ?? 'central';
+      $tenantId = $central ? 'central' : (tenant()->id ?? 'central');
 
       // Create the cache array if not yet set
       if (!isset($this->settingsCache[$tenantId])) {
