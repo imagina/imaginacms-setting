@@ -1,0 +1,12 @@
+
+{
+    "name": "Isetting",
+    "alias": "isetting",
+    "description": "manage isetting",
+    "keywords": ["isetting"],
+    "priority": 1,
+    "providers": [
+        "Modules\\Isetting\\Providers\\IsettingServiceProvider"
+    ],
+    "files": []
+}
